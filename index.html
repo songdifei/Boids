@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boids Ecosystem - Letter A</title>
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+        <!-- SVG defs for goo filter (hidden). To enable, add `class="use-goo"` to <body> or apply via JS. -->
+        <svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; width: 0; height: 0;">
+            <defs>
+                <!-- this goo filter is the secret sauce -->
+                <filter id="goo">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                    <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+                </filter>
+            </defs>
+        </svg>
+    <div class="container">
+        <div class="layout-wrapper">
+            <div class="controls">
+            <h2 style="font-size: 18px; margin-bottom: 15px;">Controls</h2>
+
+            <!-- Text Input -->
+            <div class="control-group">
+                <label for="textInput">Type Letters:</label>
+                <input type="text" id="textInput" placeholder="Enter letters (A-F)" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;">
+                <div class="control-value" id="textInputInfo">Current: A</div>
+            </div>
+
+            <!-- Upload Font -->
+            <div class="control-group">
+                <label for="fontFile">Upload Font (.ttf/.otf/.woff):</label>
+                <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2" style="width:100%">
+                <div class="button-group" style="grid-template-columns: 1fr; margin-top:8px;">
+                    <button id="fontParseBtn">Parse Uploaded Font → 5×5</button>
+                </div>
+                <div class="control-value" id="fontStatus">No font uploaded</div>
+            </div>
+
+            <div style="margin-bottom:8px;">
+                <strong>Phase:</strong> <span id="phaseLabel">ROAMING</span>
+            </div>
+
+            <!-- Resolution -->
+            <div class="control-group">
+                <label for="resolutionSlider">Grid Resolution:</label>
+                <input type="range" id="resolutionSlider" min="5" max="50" value="10">
+                <div class="control-value"><span id="resolutionValue">10</span> × <span id="resolutionValue2">10</span> pixels</div>
+            </div>
+
+            <!-- Boids Parameters -->
+            <div class="control-group">
+                <label for="sepSlider">Separation Weight:</label>
+                <input type="range" id="sepSlider" min="0" max="3" value="1" step="0.1">
+                <div class="control-value">Value: <span id="sepValue">1</span></div>
+            </div>
+
+            <div class="control-group">
+                <label for="aliSlider">Alignment Weight:</label>
+                <input type="range" id="aliSlider" min="0" max="3" value="1" step="0.1">
+                <div class="control-value">Value: <span id="aliValue">1</span></div>
+            </div>
+
+            <div class="control-group">
+                <label for="cohSlider">Cohesion Weight:</label>
+                <input type="range" id="cohSlider" min="0" max="3" value="1" step="0.1">
+                <div class="control-value">Value: <span id="cohValue">1</span></div>
+            </div>
+
+            <!-- Bird Size -->
+            <div class="control-group">
+                <label for="birdSizeSlider">Bird Size:</label>
+                <input type="range" id="birdSizeSlider" min="0.3" max="3.0" value="1" step="0.05">
+                <div class="control-value">Scale: <span id="birdSizeValue">1</span></div>
+            </div>
+
+            <div class="control-group">
+                <label for="birdOffsetSlider">Per-bird Offset Range:</label>
+                <input type="range" id="birdOffsetSlider" min="0" max="20" step="0.1" value="0">
+                <div class="control-value">Offset: <span id="birdOffsetValue">0.0</span> px</div>
+            </div>
+
+            <div class="control-group">
+                <label for="homeStrengthSlider">Home Strength:</label>
+                <input type="range" id="homeStrengthSlider" min="0.000" max="10.000" value="0.060" step="0.001">
+                <div class="control-value">Value: <span id="homeStrengthValue">0.060</span></div>
+            </div>
+
+            <div class="control-group">
+                <label for="homingPeriodSlider">Homing Period:</label>
+                <input type="range" id="homingPeriodSlider" min="2" max="60" value="10" step="1">
+                <div class="control-value">Period: <span id="homingPeriodValue">10s</span></div>
+            </div>
+
+            <div class="control-group">
+                <label for="speedMultiplierSlider">Speed:</label>
+                <input type="range" id="speedMultiplierSlider" min="0.1" max="3.0" value="1.0" step="0.1">
+                <div class="control-value">Multiplier: <span id="speedMultiplierValue">1.00x</span></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button id="feedingBtn">Spawn Food</button>
+                <button id="playPauseBtn">Pause</button>
+                <button id="refreshBtn">Refresh</button>
+                <button id="exportSvgBtn">Export SVG</button>
+                <button id="gridBtn">Grid: ON</button>
+                <button id="recordToggleBtn">Start Recording</button>
+                <button id="soundToggleBtn">Sound: ON</button>
+            </div>
+
+            <div class="control-group" style="margin-top:12px;">
+                <label for="gooBlurSlider">Goo Strength:</label>
+                <input type="range" id="gooBlurSlider" min="0" max="20" step="0.1" value="0">
+                <div class="control-value">Blur: <span id="gooBlurValue">0.0</span> px</div>
+            </div>
+
+            <!-- Shape Selection -->
+            <div style="margin-top: 20px;">
+                <label style="margin-bottom: 10px;">Select Shape:</label>
+                <div class="shape-buttons" id="shapeButtonsContainer">
+                    <!-- SVG shapes will be rendered here via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="canvas"></canvas>
+        </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="glyphs.js"></script>
+    <script src="bird.js"></script>
+    <script src="utils.js"></script>
+    <script src="renderer.js"></script>
+    <script type="module" src="ffmpeg-wrapper.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
